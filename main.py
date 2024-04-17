@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 from checkgemini import main as testgemini
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import (
-    CallbackQuery,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
 )
@@ -22,10 +19,6 @@ TELEGRAM_TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher(bot)
 
-USER_STATE = {}
-PICK_STATES = {}
-CHECK_STATES = {}
-
 keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [
@@ -36,7 +29,9 @@ keyboard = ReplyKeyboardMarkup(
         ],
         [
             KeyboardButton(text="Eco-tools 🛠"),
+            KeyboardButton(text="My slide for Lesson!")
         ],
+        
     ],
     resize_keyboard=True,
 )
@@ -44,9 +39,6 @@ keyboard = ReplyKeyboardMarkup(
 
 @dp.message_handler(commands=["start"])
 async def handle_start(message: types.Message):
-    USER_STATE[message.from_user.id] = ""
-    PICK_STATES[message.from_user.id] = 0
-    CHECK_STATES[message.from_user.id] = 0
     welcome_msg = """ 
 🌟 Welcome to a world of possibilities with Ecosystems AI! 🌍
 
@@ -70,7 +62,7 @@ Are you eager to contribute to sustainable development and explore new horizons?
     
 @dp.message_handler(commands=['ask'])
 async def askgpt(message: types.Message):
-    loading_message = await message.reply("Загрузка...")
+    loading_message = await message.reply("Loading...")
     response = askbot(message.text)
     await asyncio.sleep(2)
 
@@ -84,7 +76,7 @@ async def askgpt(message: types.Message):
     lambda message: message.text == "Eco market leaders! 🌿"
 )
 async def handle_test_gemini(message: types.Message):
-    loading_message = await message.reply("Загрузка...")
+    loading_message = await message.reply("Loading...")
     response = testgemini()
     await asyncio.sleep(2)
 
@@ -96,7 +88,7 @@ async def handle_test_gemini(message: types.Message):
     lambda message: message.text == "Environmentally friendly industries 🌍"
 )
 async def handle_test_gpt(message: types.Message):
-    loading_message = await message.reply("Загрузка...")
+    loading_message = await message.reply("Loading...")
     response = sphere_main()
     await asyncio.sleep(2)
 
@@ -108,14 +100,20 @@ async def handle_test_gpt(message: types.Message):
     lambda message: message.text == "Eco-tools 🛠"
 )
 async def handle_test_gemini(message: types.Message):
-    loading_message = await message.reply("Загрузка...")
+    loading_message = await message.reply("Loading...")
     response = instr()
     await asyncio.sleep(2)
 
     await bot.edit_message_text(
         response, chat_id=loading_message.chat.id, message_id=loading_message.message_id
     )
-
+@dp.message_handler(lambda message: message.text == "My slide for Lesson!")
+async def handle_test_gemini(message: types.Message):
+    await message.reply("Loading... Wait some seconds...")
+    file_path = "Artificial intelligence in smart grids.pdf"
+    await asyncio.sleep(2) 
+    with open(file_path, 'rb') as pdf_file:
+        await bot.send_document(chat_id=message.chat.id, document=pdf_file)
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
